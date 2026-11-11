@@ -1,0 +1,32 @@
+name: Commit checking workflow
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  check-commits:
+    name: Check commits
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the repo.
+        uses: actions/checkout@v7
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: lts/*
+
+      - name: Check commits
+        if: github.event_name == 'push'
+        run: npx --yes commitlint --last --verbose --default-config
+
+      - name: Check pull request
+        if: github.event_name == 'pull_request'
+        run: npx --yes commitlint --from ${{ github.event.pull_request.base.sha }} --to ${{ github.event.pull_request.head.sha }} --verbose --default-config
